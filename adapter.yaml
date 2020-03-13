@@ -1,0 +1,71 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: apigee-adapter
+  namespace: apigee
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: apigee-adapter
+    spec:
+      containers:
+      - name: apigee-adapter
+        # image: "gcr.io/apigee-api-management-istio/apigee-adapter-debug:1.4.1"
+        image: "gcr.io/theganyo-apigee/istio-adapter-debug:latest"
+        imagePullPolicy: Always #IfNotPresent
+        env:
+        - name: GODEBUG # value must be 0, as apigee does not support http 2
+          value: http2client=0
+        ports:
+        - containerPort: 5000
+        readinessProbe:
+          exec:
+            command: ["/grpc_health_probe", "-addr=:5000"]
+          initialDelaySeconds: 5
+        livenessProbe:
+          exec:
+            command: ["/grpc_health_probe", "-addr=:5000"]
+          initialDelaySeconds: 10
+        args:
+          - --address=:5000
+          - --log_output_level=default:warn,adapters:debug
+          # - --log_output_level=default:warn,adapters:info
+        resources:
+          limits:
+            cpu: 100m
+            memory: 100Mi
+          requests:
+            cpu: 10m
+            memory: 100Mi
+        volumeMounts:
+        - mountPath: /opt/apigee/customer
+          name: cwc-volume
+          readOnly: true
+        - mountPath: /opt/apigee/tls
+          name: tls-volume
+          readOnly: true
+      volumes:
+      - name: cwc-volume
+        secret:
+          defaultMode: 420
+          secretName: config-apigee-runtime-theganyo-apigee-test
+      - name: tls-volume
+        secret:
+          defaultMode: 420
+          secretName: apigee-runtime-theganyo-apigee-test-tls
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: apigee-adapter
+  namespace: apigee
+  labels:
+    app: apigee-adapter
+spec:
+  ports:
+  - port: 5000
+    name: http
+  selector:
+    app: apigee-adapter
