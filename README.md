@@ -1,18 +1,18 @@
 Demo Hybrid
 
-1. Install Apigee hybrid
+## 1. Install Apigee hybrid
 
-2. Ensure policy is not disabled
+## 2. Ensure policy is not disabled
 
     kubectl -n istio-system get cm istio -o jsonpath="{@.data.mesh}" | grep disablePolicyChecks
 
 Response: `disablePolicyChecks: false`
 
-3. Enable injection
+## 3. Enable injection
 
     kubectl label namespace default istio-injection=enabled
 
-4. Deploy httpbin and test ok
+## 4. Deploy httpbin and test ok
 
     export GATEWAY_URL=???
 
@@ -21,7 +21,7 @@ Response: `disablePolicyChecks: false`
 
     curl http://${GATEWAY_URL}/headers
 
-5. (Optional) Check that Istio policy is working using simple denier
+## 5. (Optional) Check that Istio policy is working using simple denier
 
     kubectl apply -f denier.yaml
 
@@ -39,7 +39,7 @@ Verify ok again
 
     curl http://${GATEWAY_URL}/headers
 
-6. Provision hybrid for Istio adapter
+## 6. Provision hybrid for Istio adapter
 
     export ORG=???
     export ENV=???
@@ -58,7 +58,7 @@ Verify ok again
 
 (use `apigee-istio-darwin` for mac)
 
-7. Deploy adapter
+## 7. Deploy adapter
 
     kubectl apply -f adapter.yaml
     
@@ -66,13 +66,13 @@ Ensure it's running
 
     kubectl -n apigee get po -l app=apigee-adapter
 
-8. Apply Istio definitions, handler, rule, test
+## 8. Apply Istio definitions, handler, rule, test
 
     kubectl apply -f definitions.yaml
     kubectl apply -f handler.yaml
     kubectl apply -f rule.yaml
        
-9. Follow standard Apigee adapter directions from this point:
+## 9. Follow standard Apigee adapter directions from this point:
 
     https://github.com/apigee/istio-mixer-adapter#authentication-test
 
